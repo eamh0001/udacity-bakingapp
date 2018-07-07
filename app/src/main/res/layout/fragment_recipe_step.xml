@@ -5,20 +5,38 @@
     android:layout_width="match_parent"
     android:orientation="vertical">
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/recipe_detail"
-    style="?android:attr/textAppearanceLarge"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp"
-    android:textIsSelectable="true"
-    tools:context=".fragments.RecipeStepFragment" />
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/tvStepShortDescription"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:textIsSelectable="true"
+        tools:context=".fragments.RecipeStepFragment" />
 
-<com.google.android.exoplayer2.ui.PlayerView
-    android:id="@+id/playerView"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/tvStepDescription"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:textIsSelectable="true"
+        tools:context=".fragments.RecipeStepFragment" />
 
-</com.google.android.exoplayer2.ui.PlayerView>
+    <ImageView
+        android:id="@+id/ivStepImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/content_desc_step_image"
+        android:visibility="gone"/>
+
+    <com.google.android.exoplayer2.ui.PlayerView
+        android:id="@+id/playerViewStep"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:visibility="gone">
+
+    </com.google.android.exoplayer2.ui.PlayerView>
 </LinearLayout>

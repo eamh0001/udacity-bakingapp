@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
 
     @Background
     void getBakingData(){
-        pbLoading.setVisibility(View.VISIBLE);
+        showLoadingBar(true);
         List<Recipe> recipeList = bakingApi.getBakingData();
         if (recipeList != null){
             recipes = new ArrayList<>(recipeList);
@@ -123,15 +123,20 @@ public class MainActivity extends AppCompatActivity
 
     @UiThread(propagation = UiThread.Propagation.REUSE)
     void refreshUI(){
-        pbLoading.setVisibility(View.INVISIBLE);
+        showLoadingBar(false);
         ((RecipesAdapter) rvRecipes.getAdapter()).setRecipes(recipes);
         drawerLayout.openDrawer(GravityCompat.START);
     }
 
     @Override
     public void onRestError() {
-        pbLoading.setVisibility(View.INVISIBLE);
+        showLoadingBar(false);
         Snackbar.make(rvRecipes, R.string.text_server_error, Snackbar.LENGTH_LONG).show();
+    }
+
+    @UiThread(propagation = UiThread.Propagation.REUSE)
+    void showLoadingBar(boolean show) {
+        pbLoading.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override

@@ -1,9 +1,13 @@
 package com.eamh.bakingapp.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.net.Uri;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.eamh.bakingapp.MainActivity;
@@ -19,6 +23,9 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -39,10 +46,16 @@ public class RecipeStepFragment extends Fragment {
 
     private SimpleExoPlayer player;
 
-    @ViewById(R.id.recipe_detail)
-    TextView tvInfo;
+    @ViewById(R.id.tvStepDescription)
+    TextView tvStepDetail;
 
-    @ViewById(R.id.playerView)
+    @ViewById(R.id.tvStepShortDescription)
+    TextView tvStepShortDescription;
+
+    @ViewById(R.id.ivStepImage)
+    ImageView ivStepImage;
+
+    @ViewById(R.id.playerViewStep)
     PlayerView playerView;
 
     @InstanceState
@@ -59,11 +72,45 @@ public class RecipeStepFragment extends Fragment {
     public RecipeStepFragment() {
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23) {
+            initializePlayer();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        hideSystemUi();
+        if ((Util.SDK_INT <= 23 || player == null)) {
+            initializePlayer();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
+    }
+
     @AfterViews
     void afterViews(){
         if (step == null && (getArguments() != null && getArguments().containsKey(INTENT_KEY_SELECTED_STEP))) {
             step = getArguments().getParcelable(INTENT_KEY_SELECTED_STEP);
         }
+
 
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
@@ -71,29 +118,82 @@ public class RecipeStepFragment extends Fragment {
             appBarLayout.setTitle(step.getShortDescription());
         }
 
-        tvInfo.setText(step.toString());
+        tvStepShortDescription.setText(step.getShortDescription());
 
-        initializePlayer();
+        if (!step.getShortDescription().equals(step.getDescription())){
+            tvStepDetail.setText(step.getDescription());
+        }
+
+        if (!TextUtils.isEmpty(step.getVideoURL())){
+            preparePlayer(step.getVideoURL());
+        }
+
+        if (!TextUtils.isEmpty(step.getThumbnailURL())){
+            initializeImage(step.getThumbnailURL());
+        }
+    }
+
+    private void initializeImage(String thumbnailURL) {
+        ivStepImage.setVisibility(View.VISIBLE);
+        Picasso.get().load(thumbnailURL).error(R.drawable.navheader).into(ivStepImage, new Callback() {
+            @Override
+            public void onSuccess() {
+                ivStepImage.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                ivStepImage.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void initializePlayer() {
-        player = ExoPlayerFactory.newSimpleInstance(
-                new DefaultRenderersFactory(getContext()),
-                new DefaultTrackSelector(), new DefaultLoadControl());
+        if (player == null) {
+            player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(getContext()),
+                    new DefaultTrackSelector(), new DefaultLoadControl());
+            playerView.setPlayer(player);
+            player.setPlayWhenReady(playWhenReady);
+            player.seekTo(currentWindow, playbackPosition);
+        }
 
-        playerView.setPlayer(player);
+        if (step != null && !TextUtils.isEmpty(step.getVideoURL())){
+            preparePlayer(step.getVideoURL());
+        }
+    }
 
-        player.setPlayWhenReady(playWhenReady);
-        player.seekTo(currentWindow, playbackPosition);
+    private void preparePlayer(String videoUrl) {
+        if (player != null) {
+            playerView.setVisibility(View.VISIBLE);
+            Uri uri = Uri.parse(videoUrl);
+            MediaSource mediaSource = buildMediaSource(uri);
+            player.prepare(mediaSource, true, false);
+        }
+    }
 
-        Uri uri = Uri.parse(step.getVideoURL());
-        MediaSource mediaSource = buildMediaSource(uri);
-        player.prepare(mediaSource, true, false);
+    @SuppressLint("InlinedApi")
+    private void hideSystemUi() {
+        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
     }
 
     private MediaSource buildMediaSource(Uri uri) {
         return new ExtractorMediaSource.Factory(
                 new DefaultHttpDataSourceFactory("exoplayer-baking-app")).
                 createMediaSource(uri);
+    }
+
+    private void releasePlayer() {
+        if (player != null) {
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+            playWhenReady = player.getPlayWhenReady();
+            player.release();
+            player = null;
+        }
     }
 }
