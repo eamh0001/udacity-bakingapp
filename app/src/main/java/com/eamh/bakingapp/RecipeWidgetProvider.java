@@ -11,6 +11,7 @@ import android.widget.RemoteViews;
 
 import com.eamh.bakingapp.models.Ingredient;
 import com.eamh.bakingapp.models.Recipe;
+import com.eamh.bakingapp.widget.ListRemoteViewsService;
 import com.eamh.bakingapp.widget.WidgetService;
 
 import java.util.List;
@@ -80,13 +81,22 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
         Log.d(TAG, "loadWithRecipes ");
         //TODO load recipes listview and manage click
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_widget);
-        CharSequence widgetText = "loadWithRecipes";
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+        views.setViewVisibility(R.id.appwidget_text, View.GONE);
+
+//        CharSequence widgetText = "loadWithRecipes";
+//        views.setTextViewText(R.id.appwidget_text, widgetText);
         Intent ingredientsIntent = new Intent(context, WidgetService.class);
         ingredientsIntent.setAction(WidgetService.ACTION_GET_RECIPE_INGREDIENTS);
         ingredientsIntent.putExtra(WidgetService.INTENT_KEY_RECIPE_ID, 0);
+//        PendingIntent pendingIntent = PendingIntent.getService(context, 0, ingredientsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+//        views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
+
+        Intent intent = new Intent(context, ListRemoteViewsService.class);
+        views.setRemoteAdapter(R.id.lvRecipes, intent);
+
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, ingredientsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
+        views.setPendingIntentTemplate(R.id.appwidget_text, pendingIntent);
+        views.setEmptyView(R.id.lvRecipes, R.id.appwidget_text2);
         return views;
     }
 

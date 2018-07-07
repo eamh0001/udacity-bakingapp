@@ -1,8 +1,9 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#09C"
     android:padding="@dimen/widget_margin">
+
 
     <TextView
         android:id="@+id/appwidget_text"
@@ -17,6 +18,10 @@
         android:textColor="#ffffff"
         android:textSize="24sp"
         android:textStyle="bold|italic" />
+    <ListView
+        android:id="@+id/lvRecipes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/appwidget_text2"
@@ -30,6 +35,5 @@
         android:text="appwidget_text2"
         android:textColor="#ffffff"
         android:textSize="24sp"
-        android:textStyle="bold|italic"
-        android:visibility="gone"/>
-</RelativeLayout>
+        android:textStyle="bold|italic" />
+</FrameLayout>
