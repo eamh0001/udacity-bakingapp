@@ -8,11 +8,13 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.eamh.bakingapp.R;
 import com.eamh.bakingapp.RecipeWidgetProvider;
 import com.eamh.bakingapp.models.Ingredient;
 import com.eamh.bakingapp.models.Recipe;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class WidgetService extends IntentService {
 
@@ -21,10 +23,10 @@ public class WidgetService extends IntentService {
     public static final String ACTION_GET_RECIPES =
             "com.eamh.bakingapp.action.get_recipes";
 
-    public static final String ACTION_GET_RECIPE_INGREDIENTS =
-            "com.eamh.bakingapp.action.get_recipe_ingredients";
+    public static final String ACTION_SHOW_RECIPE_INGREDIENTS =
+            "com.eamh.bakingapp.action.show_recipe_ingredients";
 
-    public static final String INTENT_KEY_RECIPE_ID = "IKRI";
+    public static final String INTENT_KEY_RECIPE_INGREDIENTS_LIST = "IKRIL";
 
     public WidgetService() {
         super(TAG);
@@ -36,10 +38,10 @@ public class WidgetService extends IntentService {
         context.startService(intent);
     }
 
-    public static void startActionGetRecipeIngredients(Context context, int recipeId){
+    public static void startActionGetRecipeIngredients(Context context, ArrayList<Ingredient> ingredients){
         Intent intent = new Intent(context, WidgetService.class);
         intent.setAction(ACTION_GET_RECIPES);
-        intent.putExtra(INTENT_KEY_RECIPE_ID, recipeId);
+        intent.putParcelableArrayListExtra(INTENT_KEY_RECIPE_INGREDIENTS_LIST, ingredients);
         context.startService(intent);
     }
 
@@ -52,10 +54,10 @@ public class WidgetService extends IntentService {
                 case ACTION_GET_RECIPES:
                     handleActionGetRecipes();
                     break;
-                case ACTION_GET_RECIPE_INGREDIENTS:
-                    if (intent.hasExtra(INTENT_KEY_RECIPE_ID)){
-                        int recipeId = intent.getIntExtra(INTENT_KEY_RECIPE_ID, -1);
-                        handleActionGetRecipeIngredients(recipeId);
+                case ACTION_SHOW_RECIPE_INGREDIENTS:
+                    if (intent.hasExtra(INTENT_KEY_RECIPE_INGREDIENTS_LIST)){
+                        ArrayList<Ingredient> ingredients = intent.getParcelableArrayListExtra(INTENT_KEY_RECIPE_INGREDIENTS_LIST);
+                        handleActionGetRecipeIngredients(ingredients);
                     }
                     break;
                 default:
@@ -65,22 +67,22 @@ public class WidgetService extends IntentService {
     }
 
     private void handleActionGetRecipes() {
-        //TODO getRecipes
         Log.d(TAG, "handleActionGetRecipes");
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidgetProvider.class));
+
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.lvRecipes);
         //Now update all widgets
-        RecipeWidgetProvider.updateRecipesWidgets(this, appWidgetManager, appWidgetIds, new ArrayList<Recipe>(), null);
+        RecipeWidgetProvider.updateRecipesWidgets(this, appWidgetManager, appWidgetIds, null);
     }
 
-    private void handleActionGetRecipeIngredients(int recipeId) {
-        Log.d(TAG, "handleActionGetRecipeIngredients "+recipeId);
-//        if (recipeId > -1){
-            //TODO getIngredients
+    private void handleActionGetRecipeIngredients(ArrayList<Ingredient> ingredients) {
+        Log.d(TAG, "handleActionGetRecipeIngredients "+ingredients);
+        if (ingredients != null){
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidgetProvider.class));
             //Now update all widgets
-            RecipeWidgetProvider.updateRecipesWidgets(this, appWidgetManager, appWidgetIds, null, new ArrayList<Ingredient>());
-//        }
+            RecipeWidgetProvider.updateRecipesWidgets(this, appWidgetManager, appWidgetIds, ingredients);
+        }
     }
 }

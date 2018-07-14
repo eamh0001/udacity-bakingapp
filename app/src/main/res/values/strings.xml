@@ -9,4 +9,7 @@
     <string name="content_desc_step_image">Step image</string>
     <string name="appwidget_text">appwidget</string>
     <string name="add_widget">Add widget</string>
+    <string name="no_data_available">No data available</string>
+    <string name="txt_ingredients">Ingredients</string>
+    <string name="content_description_navheader">Cake image</string>
 </resources>

@@ -5,15 +5,19 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
 import com.eamh.bakingapp.models.Ingredient;
 import com.eamh.bakingapp.models.Recipe;
+import com.eamh.bakingapp.widget.IngredientsRemoteViewsService;
 import com.eamh.bakingapp.widget.ListRemoteViewsService;
 import com.eamh.bakingapp.widget.WidgetService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,26 +44,22 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
     }
 
     public static void updateRecipesWidgets(Context context, AppWidgetManager appWidgetManager,
-                                            int[] appWidgetIds, List<Recipe> recipes, List<Ingredient> ingredients){
-        Log.d(TAG, "updateRecipesWidgets "+ingredients+" "+recipes);
+                                            int[] appWidgetIds, ArrayList<Ingredient> ingredients){
+        Log.d(TAG, "updateRecipesWidgets "+ingredients);
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, recipes, ingredients);
+            updateAppWidget(context, appWidgetManager, appWidgetId, ingredients);
         }
     }
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId,
-                                List<Recipe> recipes, List<Ingredient> ingredients) {
+                                ArrayList<Ingredient> ingredients) {
         // Construct the RemoteViews object
         RemoteViews remoteViews;
 
         if (ingredients != null){
             remoteViews = loadWithRecipeIngrecients(context, ingredients);
         }else {
-            if (recipes != null){
-                remoteViews = loadWithRecipes(context, recipes);
-            }else {
-                remoteViews = loadEmptyView(context);
-            }
+            remoteViews = loadWithRecipes(context);
         }
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
@@ -77,37 +77,39 @@ public class RecipeWidgetProvider extends AppWidgetProvider {
         return views;
     }
 
-    private static RemoteViews loadWithRecipes(Context context, List<Recipe> recipes) {
+    private static RemoteViews loadWithRecipes(Context context) {
         Log.d(TAG, "loadWithRecipes ");
-        //TODO load recipes listview and manage click
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_widget);
         views.setViewVisibility(R.id.appwidget_text, View.GONE);
 
-//        CharSequence widgetText = "loadWithRecipes";
-//        views.setTextViewText(R.id.appwidget_text, widgetText);
-        Intent ingredientsIntent = new Intent(context, WidgetService.class);
-        ingredientsIntent.setAction(WidgetService.ACTION_GET_RECIPE_INGREDIENTS);
-        ingredientsIntent.putExtra(WidgetService.INTENT_KEY_RECIPE_ID, 0);
-//        PendingIntent pendingIntent = PendingIntent.getService(context, 0, ingredientsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-//        views.setOnClickPendingIntent(R.id.appwidget_text, pendingIntent);
-
-        Intent intent = new Intent(context, ListRemoteViewsService.class);
-        views.setRemoteAdapter(R.id.lvRecipes, intent);
-
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, ingredientsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setPendingIntentTemplate(R.id.appwidget_text, pendingIntent);
+        Intent remoteAdapterIntent = new Intent(context, ListRemoteViewsService.class);
+        views.setRemoteAdapter(R.id.lvRecipes, remoteAdapterIntent);
         views.setEmptyView(R.id.lvRecipes, R.id.appwidget_text2);
+
+        //Mounts the intent that will acts as a template to be filled in with ingredients extra by ListRemoteViewsFactory
+        Intent ingredientsIntentTemplate = new Intent(context, WidgetService.class);
+        ingredientsIntentTemplate.setAction(WidgetService.ACTION_SHOW_RECIPE_INGREDIENTS);
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0, ingredientsIntentTemplate, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        views.setPendingIntentTemplate(R.id.lvRecipes, pendingIntent);
+
         return views;
     }
 
-    private static RemoteViews loadWithRecipeIngrecients(Context context, List<Ingredient> ingredients) {
-        Log.d(TAG, "loadWithRecipeIngrecients ");
-        //TODO load ingredients listview
+    private static RemoteViews loadWithRecipeIngrecients(Context context, ArrayList<Ingredient> ingredients) {
+
+        Intent remoteAdapterIntent = new Intent(context, IngredientsRemoteViewsService.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(WidgetService.INTENT_KEY_RECIPE_INGREDIENTS_LIST, ingredients);
+
+        remoteAdapterIntent.putExtra(IngredientsRemoteViewsService.KEY_BUNDLE_EXTRAS, bundle);
+
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.recipe_widget);
-        CharSequence widgetText = "loadWithRecipeIngrecients";
-        views.setTextViewText(R.id.appwidget_text2, widgetText);
-        views.setViewVisibility(R.id.appwidget_text, View.GONE);
-        views.setViewVisibility(R.id.appwidget_text2, View.VISIBLE);
+        views.setRemoteAdapter(R.id.lvIngredients, remoteAdapterIntent);
+        views.setEmptyView(R.id.lvIngredients, R.id.appwidget_text2);
+
+        views.setViewVisibility(R.id.lvRecipes, View.GONE);
+        views.setViewVisibility(R.id.lvIngredients, View.VISIBLE);
         return views;
     }
 }

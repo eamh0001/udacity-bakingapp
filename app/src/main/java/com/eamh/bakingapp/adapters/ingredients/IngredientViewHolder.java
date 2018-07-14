@@ -14,7 +14,6 @@ import com.eamh.bakingapp.models.Recipe;
 public class IngredientViewHolder extends RecyclerView.ViewHolder{
 
     private TextView tvTitle;
-    private Ingredient ingredient;
 
     public IngredientViewHolder(View itemView) {
         super(itemView);
@@ -22,7 +21,6 @@ public class IngredientViewHolder extends RecyclerView.ViewHolder{
     }
 
     public void setIngredient(Ingredient ingredient) {
-        this.ingredient = ingredient;
         if (itemView != null){
             tvTitle.setText(itemView.getContext().getString(R.string.format_ingredient_details,ingredient.getQuantity(), ingredient.getMeasure(), ingredient.getIngredient()));
         }

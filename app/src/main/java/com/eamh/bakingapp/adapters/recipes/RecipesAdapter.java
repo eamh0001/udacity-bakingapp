@@ -60,9 +60,6 @@ public class RecipesAdapter
 
     @Override
     public void onRecipeSelected(Recipe recipe, RecyclerView.ViewHolder viewHolder) {
-//        notifyItemChanged(lastRecipeSelectedPosition);
-//        lastRecipeSelectedPosition = viewHolder.getLayoutPosition();
-//        notifyItemChanged(lastRecipeSelectedPosition);
         listener.onRecipeSelected(recipe);
     }
 }

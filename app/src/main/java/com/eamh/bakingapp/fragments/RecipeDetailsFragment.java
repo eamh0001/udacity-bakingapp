@@ -34,9 +34,7 @@ public class RecipeDetailsFragment extends Fragment{
     @InstanceState
     Recipe recipe;
 
-    public RecipeDetailsFragment() {
-        // Required empty public constructor
-    }
+    public RecipeDetailsFragment() { }
 
     @AfterViews
     void afterViews(){
@@ -52,7 +50,6 @@ public class RecipeDetailsFragment extends Fragment{
     @UiThread(propagation = UiThread.Propagation.REUSE)
     void refreshUI(Recipe recipe){
         if (!TextUtils.isEmpty(recipe.getImage())){
-            //http://i.imgur.com/DvpvklR.png
             Picasso.get().load(recipe.getImage()).error(R.drawable.navheader).into(ivStepImage, new Callback() {
                 @Override
                 public void onSuccess() {

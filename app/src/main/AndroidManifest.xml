@@ -38,13 +38,6 @@
                 android:value="com.eamh.bakingapp.MainActivity_" />
         </activity>
 
-        <provider
-            android:name=".database.RecipesProvider"
-            android:authorities="com.eam.bakingapp"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="com.eamh.bakingapp.provider.READ_WRITE" />
-
         <receiver android:name=".RecipeWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -60,6 +53,9 @@
         <service
             android:name=".widget.ListRemoteViewsService"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service
+            android:name=".widget.IngredientsRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"/>
 
     </application>
 

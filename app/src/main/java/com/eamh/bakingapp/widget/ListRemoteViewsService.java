@@ -8,70 +8,79 @@ import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
 import com.eamh.bakingapp.R;
+import com.eamh.bakingapp.api.BakingApi;
+import com.eamh.bakingapp.models.Recipe;
+
+import org.androidannotations.annotations.EBean;
+import org.androidannotations.rest.spring.annotations.RestService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ListRemoteViewsService extends RemoteViewsService{
 
-    public static final String INTENT_KEY_INFO = "IKI";
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new ListRemoteViewsFactory(this.getApplicationContext());
+        return ListRemoteViewsFactory_.getInstance_(this.getApplicationContext());
+//        return new ListRemoteViewsFactory(this.getApplicationContext());
     }
 }
 
+@EBean
 class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory{
 
     private static final String TAG = ListRemoteViewsFactory.class.getName();
     private final Context context;
-    private List<String> smthngs = new ArrayList<>();
+    private List<Recipe> recipes;
+//    private List<String> recipes = new ArrayList<>();
+
+    @RestService
+    BakingApi bakingApi;
 
     public ListRemoteViewsFactory(Context context) {
         this.context = context;
     }
 
     @Override
-    public void onCreate() {
-        Log.d(TAG, "onCreate");
-        for (int i = 0; i < 10; i++) {
-            smthngs.add("Recipe "+(1+i));
-        }
-//        try {
-//            Thread.sleep(3000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
+    public void onCreate() { }
+
+    @Override
+    public void onDataSetChanged() {
+        recipes = bakingApi.getBakingData();
+
+//        for (int i = 0; i < 10; i++) {
+//            recipes.add("Recipe "+(1+i));
 //        }
     }
 
     @Override
-    public void onDataSetChanged() {
-
-    }
-
-    @Override
     public void onDestroy() {
-        smthngs.clear();
+        if (recipes != null)
+            recipes.clear();
     }
 
     @Override
     public int getCount() {
-        return smthngs != null ? smthngs.size() : 0;
+        return recipes != null ? recipes.size() : 0;
     }
 
     @Override
     public RemoteViews getViewAt(int i) {
-        String infoText = smthngs.get(i);
-        Log.d(TAG, infoText);
+        Log.d(TAG, "getViewAt "+i);
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_list_item);
-        remoteViews.setTextViewText(R.id.tvInfo, infoText);
+        if (recipes != null){
+            Recipe recipe = recipes.get(i);
+            Log.d(TAG, recipe.toString());
+            remoteViews.setTextViewText(R.id.tvInfo, recipe.getName());
 
-        Bundle extras = new Bundle();
-        extras.putString(ListRemoteViewsService.INTENT_KEY_INFO, infoText);
-        Intent fillInIntent = new Intent();
-        fillInIntent.putExtras(extras);
-        remoteViews.setOnClickFillInIntent(R.id.tvInfo, fillInIntent);
+            //Fills the IntentTemplate from RecipeWidgetProvider
+            Bundle extras = new Bundle();
+            extras.putParcelableArrayList(WidgetService.INTENT_KEY_RECIPE_INGREDIENTS_LIST, recipe.getIngredients());
+            Intent fillInIntent = new Intent();
+            fillInIntent.putExtras(extras);
+            remoteViews.setOnClickFillInIntent(R.id.flRoot, fillInIntent);
+        }
         return remoteViews;
     }
 

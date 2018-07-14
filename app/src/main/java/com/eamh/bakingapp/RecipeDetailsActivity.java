@@ -31,8 +31,6 @@ public class RecipeDetailsActivity extends AppCompatActivity {
 
     @AfterViews
     void afterViews() {
-//        setSupportActionBar(toolbar);
-
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

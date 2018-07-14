@@ -14,6 +14,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.InstanceState;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 @EFragment(R.layout.fragment_recipe_info)
@@ -60,6 +61,9 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
     @AfterViews
     void afterViews(){
         rvRecipeSteps.setAdapter(new RecipeStepsAdapter(this));
+        if (recipe != null){
+            refreshUI();
+        }
     }
 
     public void setData(Recipe recipe) {
@@ -67,9 +71,11 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
         refreshUI();
     }
 
-    private void refreshUI() {
-        tvInfo.setText(recipe.getName());
-        ((RecipeStepsAdapter) rvRecipeSteps.getAdapter()).setSteps(recipe.getSteps());
+    @UiThread(propagation = UiThread.Propagation.REUSE)
+    void refreshUI() {
+        if (rvRecipeSteps != null && recipe!= null) {
+            ((RecipeStepsAdapter) rvRecipeSteps.getAdapter()).setSteps(recipe.getSteps());
+        }
     }
 
     @Override

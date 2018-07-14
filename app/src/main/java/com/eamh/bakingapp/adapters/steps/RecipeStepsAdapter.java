@@ -60,9 +60,6 @@ public class RecipeStepsAdapter
 
     @Override
     public void onStepSelected(Step step, RecyclerView.ViewHolder viewHolder) {
-        //        notifyItemChanged(lastStepSelectedPosition);
-//        lastStepSelectedPosition = viewHolder.getLayoutPosition();
-//        notifyItemChanged(lastStepSelectedPosition);
         listener.onStepSelected(step);
     }
 }

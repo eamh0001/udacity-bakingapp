@@ -1,6 +1,10 @@
 package com.eamh.bakingapp;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.design.widget.Snackbar;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +20,7 @@ import android.widget.Toast;
 import com.eamh.bakingapp.adapters.recipes.RecipesAdapter;
 import com.eamh.bakingapp.api.BakingApi;
 import com.eamh.bakingapp.api.CustomRestErrorHandler;
+import com.eamh.bakingapp.api.IdlingResource.SimpleIdlingResource;
 import com.eamh.bakingapp.fragments.RecipeDetailsFragment;
 import com.eamh.bakingapp.fragments.RecipeDetailsFragment_;
 import com.eamh.bakingapp.fragments.RecipeInfoFragment;
@@ -56,6 +61,9 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = MainActivity.class.getName();
 
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
     @RestService
     BakingApi bakingApi;
 
@@ -80,10 +88,12 @@ public class MainActivity extends AppCompatActivity
     @InstanceState
     ArrayList<Recipe> recipes;
 
+    @InstanceState
+    Recipe selectedRecipe;
+
     private boolean twoPanelsMode;
 
     private RecipeInfoFragment recipeInfoFragment;
-    private RecipeStepFragment recipeStepFragment;
 
     @AfterInject
     void afterInject(){
@@ -96,15 +106,18 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_nav_menu);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        toolbar.setTitle(getTitle());
         twoPanelsMode = findViewById(R.id.twoPanelContainer) != null;
         rvRecipes.setAdapter(new RecipesAdapter(this));
 
         initFragments();
 
         if (recipes != null) {
-            refreshUI();
+            showRecipes();
+            if (selectedRecipe != null){
+                onRecipeSelected(selectedRecipe);
+            }else showDrawner(true);
         }else {
+            setIdlingResourceStatus(true);
             getBakingData();
         }
     }
@@ -115,17 +128,18 @@ public class MainActivity extends AppCompatActivity
         List<Recipe> recipeList = bakingApi.getBakingData();
         if (recipeList != null){
             recipes = new ArrayList<>(recipeList);
+            showDrawner(true);
         }else {
             recipes = new ArrayList<>();
         }
-        refreshUI();
+        showRecipes();
     }
 
     @UiThread(propagation = UiThread.Propagation.REUSE)
-    void refreshUI(){
+    void showRecipes(){
         showLoadingBar(false);
         ((RecipesAdapter) rvRecipes.getAdapter()).setRecipes(recipes);
-        drawerLayout.openDrawer(GravityCompat.START);
+        setIdlingResourceStatus(false);
     }
 
     @Override
@@ -139,6 +153,15 @@ public class MainActivity extends AppCompatActivity
         pbLoading.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
     }
 
+    @UiThread(propagation = UiThread.Propagation.REUSE)
+    void showDrawner(boolean show){
+        if (show) {
+            drawerLayout.openDrawer(GravityCompat.START);
+        }else {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -147,7 +170,7 @@ public class MainActivity extends AppCompatActivity
 
         switch(item.getItemId()) {
             case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
+                showDrawner(true);
                 return true;
         }
 
@@ -156,6 +179,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRecipeSelected(Recipe recipe) {
+        selectedRecipe = recipe;
         recipeInfoFragment.setData(recipe);
         toolbar.setTitle(recipe.getName());
         drawerLayout.closeDrawers();
@@ -192,6 +216,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Only called from test, creates and returns a new {@link SimpleIdlingResource}.
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
+
+    private void setIdlingResourceStatus(boolean status){
+        if (mIdlingResource != null) {
+            mIdlingResource.setIdleState(status);
+        }
+    }
     private void initFragments() {
         recipeInfoFragment = RecipeInfoFragment_
                 .builder()
