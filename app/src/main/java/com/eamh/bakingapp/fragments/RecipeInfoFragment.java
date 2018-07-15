@@ -1,8 +1,11 @@
 package com.eamh.bakingapp.fragments;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.eamh.bakingapp.R;
@@ -25,6 +28,8 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
         void onRecipeStepSelected(Step step);
     }
 
+    public static final String INTENT_KEY_SELECTED_RECIPE = "IKSR";
+
     @ViewById(R.id.tvInfo)
     TextView tvInfo;
 
@@ -34,6 +39,13 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
     @InstanceState
     Recipe recipe;
 
+    @InstanceState
+    Parcelable listState;
+
+    @InstanceState
+    int scrollPosition;
+
+    private RecipeStepsAdapter recipeStepsAdapter;
     private RecipeInfoFragmentListener fragmentListener;
 
     @Override
@@ -58,9 +70,27 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
         fragmentListener.onRecipeInfoSelected(recipe);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        listState = rvRecipeSteps.getLayoutManager().onSaveInstanceState();
+        LinearLayoutManager linearLayoutManager = ((LinearLayoutManager) rvRecipeSteps.getLayoutManager());
+        scrollPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
+        int last = linearLayoutManager.findLastCompletelyVisibleItemPosition();
+    }
+
     @AfterViews
     void afterViews(){
-        rvRecipeSteps.setAdapter(new RecipeStepsAdapter(this));
+        if (recipe == null && (getArguments() != null && getArguments().containsKey(INTENT_KEY_SELECTED_RECIPE))) {
+            recipe = getArguments().getParcelable(INTENT_KEY_SELECTED_RECIPE);
+        }
+
+        if (recipeStepsAdapter == null) {
+            recipeStepsAdapter = new RecipeStepsAdapter(this);
+            rvRecipeSteps.setAdapter(recipeStepsAdapter);
+        }
+
+
         if (recipe != null){
             refreshUI();
         }
@@ -75,6 +105,9 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
     void refreshUI() {
         if (rvRecipeSteps != null && recipe!= null) {
             ((RecipeStepsAdapter) rvRecipeSteps.getAdapter()).setSteps(recipe.getSteps());
+            if (listState != null) {
+                rvRecipeSteps.getLayoutManager().onRestoreInstanceState(listState);
+            }
         }
     }
 

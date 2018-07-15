@@ -1,5 +1,6 @@
 package com.eamh.bakingapp;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity
         RecipeInfoFragment.RecipeInfoFragmentListener {
 
     private static final String TAG = MainActivity.class.getName();
+    private static final String STATE_KEY_RECYCLERVIEW = "SKR";
 
     @Nullable
     private SimpleIdlingResource mIdlingResource;
@@ -88,12 +90,18 @@ public class MainActivity extends AppCompatActivity
     @InstanceState
     ArrayList<Recipe> recipes;
 
-    @InstanceState
-    Recipe selectedRecipe;
-
     private boolean twoPanelsMode;
 
     private RecipeInfoFragment recipeInfoFragment;
+
+    @InstanceState
+    boolean isRecipeInfoFragmentInitialized;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getIdlingResource();
+    }
 
     @AfterInject
     void afterInject(){
@@ -109,15 +117,11 @@ public class MainActivity extends AppCompatActivity
         twoPanelsMode = findViewById(R.id.twoPanelContainer) != null;
         rvRecipes.setAdapter(new RecipesAdapter(this));
 
-        initFragments();
-
         if (recipes != null) {
             showRecipes();
-            if (selectedRecipe != null){
-                onRecipeSelected(selectedRecipe);
-            }else showDrawner(true);
+            showDrawner(!isRecipeInfoFragmentInitialized);
         }else {
-            setIdlingResourceStatus(true);
+            setIdlingResourceStatus(false);
             getBakingData();
         }
     }
@@ -139,7 +143,7 @@ public class MainActivity extends AppCompatActivity
     void showRecipes(){
         showLoadingBar(false);
         ((RecipesAdapter) rvRecipes.getAdapter()).setRecipes(recipes);
-        setIdlingResourceStatus(false);
+        setIdlingResourceStatus(true);
     }
 
     @Override
@@ -179,9 +183,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRecipeSelected(Recipe recipe) {
-        selectedRecipe = recipe;
-        recipeInfoFragment.setData(recipe);
-        toolbar.setTitle(recipe.getName());
+        initRecipeInfoFragment(recipe);
         drawerLayout.closeDrawers();
         if (twoPanelsMode) {
             onRecipeInfoSelected(recipe);
@@ -192,6 +194,7 @@ public class MainActivity extends AppCompatActivity
     public void onRecipeInfoSelected(Recipe recipe) {
         Toast.makeText(this, recipe.getName(), Toast.LENGTH_LONG).show();
         if (twoPanelsMode) {
+            toolbar.setTitle(recipe.getName());
             RecipeDetailsFragment recipeDetailsFragment = RecipeDetailsFragment_
                     .builder()
                     .arg(RecipeDetailsFragment.INTENT_KEY_SELECTED_RECIPE, recipe)
@@ -233,11 +236,14 @@ public class MainActivity extends AppCompatActivity
             mIdlingResource.setIdleState(status);
         }
     }
-    private void initFragments() {
+
+    private void initRecipeInfoFragment(Recipe recipe) {
         recipeInfoFragment = RecipeInfoFragment_
                 .builder()
+                .arg(RecipeInfoFragment.INTENT_KEY_SELECTED_RECIPE, recipe)
                 .build();
         replaceFragmentAt(recipeInfoFragment, R.id.fragmentContainerMaster);
+        isRecipeInfoFragmentInitialized = true;
     }
 
     private void replaceFragmentAt(Fragment fragment, int container){

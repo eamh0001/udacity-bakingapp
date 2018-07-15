@@ -3,10 +3,16 @@ package com.eamh.bakingapp.fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,6 +48,7 @@ import org.androidannotations.annotations.ViewById;
 @EFragment(R.layout.fragment_recipe_step)
 public class RecipeStepFragment extends Fragment {
 
+    private static final String TAG = RecipeStepFragment.class.getName();
     public static final String INTENT_KEY_SELECTED_STEP ="IKSS";
 
     private SimpleExoPlayer player;
@@ -61,9 +68,12 @@ public class RecipeStepFragment extends Fragment {
     @InstanceState
     Step step;
 
-    private boolean playWhenReady;
-    private int currentWindow;
-    private long playbackPosition;
+    @InstanceState
+    boolean playWhenReady;
+    @InstanceState
+    int currentWindow;
+    @InstanceState
+    long playbackPosition;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -109,7 +119,6 @@ public class RecipeStepFragment extends Fragment {
         if (step == null && (getArguments() != null && getArguments().containsKey(INTENT_KEY_SELECTED_STEP))) {
             step = getArguments().getParcelable(INTENT_KEY_SELECTED_STEP);
         }
-
 
         Activity activity = this.getActivity();
         CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
@@ -166,7 +175,7 @@ public class RecipeStepFragment extends Fragment {
             playerView.setVisibility(View.VISIBLE);
             Uri uri = Uri.parse(videoUrl);
             MediaSource mediaSource = buildMediaSource(uri);
-            player.prepare(mediaSource, true, false);
+            player.prepare(mediaSource, false, false);
         }
     }
 

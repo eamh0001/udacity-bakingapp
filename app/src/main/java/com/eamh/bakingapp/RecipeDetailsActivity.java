@@ -29,15 +29,19 @@ public class RecipeDetailsActivity extends AppCompatActivity {
     @Extra(INTENT_KEY_SELECTED_RECIPE)
     Recipe recipe;
 
+    @InstanceState
+    boolean isInitialized;
+
     @AfterViews
     void afterViews() {
         // Show the Up button in the action bar.
+        setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (recipe != null) {
+        if (recipe != null && !isInitialized) {
             toolbar.setTitle(recipe.getName());
             RecipeDetailsFragment fragment = RecipeDetailsFragment_
                     .builder()
@@ -47,6 +51,7 @@ public class RecipeDetailsActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, fragment)
                     .commit();
+            isInitialized = true;
         }
     }
 

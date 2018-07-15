@@ -18,10 +18,10 @@ public class IngredientsAdapter
 
 
     private List<Ingredient> ingredients;
-    private int lastRecipeSelectedPosition;
+//    private int lastRecipeSelectedPosition;
 
     public IngredientsAdapter() {
-        this.lastRecipeSelectedPosition =  RecyclerView.NO_POSITION;
+//        this.lastRecipeSelectedPosition =  RecyclerView.NO_POSITION;
     }
 
     public List<Ingredient> getIngredients() {
@@ -43,7 +43,7 @@ public class IngredientsAdapter
     @Override
     public void onBindViewHolder(final IngredientViewHolder holder, int position) {
         holder.setIngredient(ingredients.get(position));
-        holder.itemView.setSelected(lastRecipeSelectedPosition == position);
+//        holder.itemView.setSelected(lastRecipeSelectedPosition == position);
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.eamh.bakingapp.fragments.RecipeStepFragment;
 import com.eamh.bakingapp.fragments.RecipeStepFragment_;
 import com.eamh.bakingapp.models.Step;
 
-import org.androidannotations.annotations.AfterExtras;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.Extra;
@@ -30,12 +29,10 @@ public class RecipeStepActivity extends AppCompatActivity {
     Toolbar toolbar;
 
     @InstanceState
+    boolean isInitialized;
+
     @Extra(RecipeStepFragment.INTENT_KEY_SELECTED_STEP)
     Step step;
-
-    @AfterExtras
-    void afterExtras(){
-    }
 
     @AfterViews
     void afterViews(){
@@ -47,7 +44,7 @@ public class RecipeStepActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (step != null) {
+        if (step != null && !isInitialized) {
             RecipeStepFragment fragment = RecipeStepFragment_
                     .builder()
                     .arg(RecipeStepFragment.INTENT_KEY_SELECTED_STEP, step)
@@ -56,6 +53,7 @@ public class RecipeStepActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.recipeStepContainer, fragment)
                     .commit();
+            isInitialized = true;
         }
     }
 
