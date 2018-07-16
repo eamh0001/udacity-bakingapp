@@ -42,6 +42,7 @@ public class RecipeStepActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(step.getShortDescription());
         }
 
         if (step != null && !isInitialized) {

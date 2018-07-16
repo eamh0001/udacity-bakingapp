@@ -93,12 +93,6 @@ public class RecipeDetailsFragment extends Fragment{
             });
         }else ivStepImage.setVisibility(View.GONE);
 
-        Activity activity = this.getActivity();
-        CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-        if (appBarLayout != null) {
-            appBarLayout.setTitle(getString(R.string.format_ingredients_title, recipe.getName()));
-        }
-
         ingredientsAdapter.setIngredients(recipe.getIngredients());
 
         if (listState != null) {

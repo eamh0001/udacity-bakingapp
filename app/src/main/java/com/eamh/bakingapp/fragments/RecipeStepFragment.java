@@ -2,6 +2,7 @@ package com.eamh.bakingapp.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -118,12 +119,6 @@ public class RecipeStepFragment extends Fragment {
     void afterViews(){
         if (step == null && (getArguments() != null && getArguments().containsKey(INTENT_KEY_SELECTED_STEP))) {
             step = getArguments().getParcelable(INTENT_KEY_SELECTED_STEP);
-        }
-
-        Activity activity = this.getActivity();
-        CollapsingToolbarLayout appBarLayout = activity.findViewById(R.id.toolbar_layout);
-        if (appBarLayout != null) {
-            appBarLayout.setTitle(step.getShortDescription());
         }
 
         tvStepShortDescription.setText(step.getShortDescription());

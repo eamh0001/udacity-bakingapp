@@ -42,7 +42,7 @@ public class RecipeDetailsActivity extends AppCompatActivity {
         }
 
         if (recipe != null && !isInitialized) {
-            toolbar.setTitle(recipe.getName());
+            toolbar.setTitle(getString(R.string.format_ingredients_title, recipe.getName()));
             RecipeDetailsFragment fragment = RecipeDetailsFragment_
                     .builder()
                     .arg(RecipeDetailsFragment.INTENT_KEY_SELECTED_RECIPE, recipe)

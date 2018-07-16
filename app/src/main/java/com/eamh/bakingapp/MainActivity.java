@@ -92,8 +92,6 @@ public class MainActivity extends AppCompatActivity
 
     private boolean twoPanelsMode;
 
-    private RecipeInfoFragment recipeInfoFragment;
-
     @InstanceState
     boolean isRecipeInfoFragmentInitialized;
 
@@ -183,6 +181,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRecipeSelected(Recipe recipe) {
+        toolbar.setTitle(recipe.getName());
         initRecipeInfoFragment(recipe);
         drawerLayout.closeDrawers();
         if (twoPanelsMode) {
@@ -238,7 +237,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initRecipeInfoFragment(Recipe recipe) {
-        recipeInfoFragment = RecipeInfoFragment_
+        RecipeInfoFragment recipeInfoFragment = RecipeInfoFragment_
                 .builder()
                 .arg(RecipeInfoFragment.INTENT_KEY_SELECTED_RECIPE, recipe)
                 .build();
