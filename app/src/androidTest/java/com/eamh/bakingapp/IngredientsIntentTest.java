@@ -31,9 +31,12 @@ public class IngredientsIntentTest {
         IdlingRegistry.getInstance().register(mIdlingResource);
     }
 
+    /**
+     * For phones, or tablets with width less than 800dp
+     * an intent to RecipeDetailsActivity_ is fired
+     */
     @Test
     public void checkIntentOnIngredientsClicked() {
-        System.out.println(RecipeDetailsActivity_.class.getCanonicalName());
         onView(withId(R.id.rvRecipeList))
                 .perform(actionOnItemAtPosition(0, click()));
         onView(withText("Ingredients")).perform(click());
