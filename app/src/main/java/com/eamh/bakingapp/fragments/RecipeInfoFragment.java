@@ -76,7 +76,6 @@ public class RecipeInfoFragment extends Fragment implements RecipeStepsAdapter.R
         listState = rvRecipeSteps.getLayoutManager().onSaveInstanceState();
         LinearLayoutManager linearLayoutManager = ((LinearLayoutManager) rvRecipeSteps.getLayoutManager());
         scrollPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
-        int last = linearLayoutManager.findLastCompletelyVisibleItemPosition();
     }
 
     @AfterViews
